@@ -8,6 +8,11 @@ use Test::More;
 
 {
   package Abort::Test;
+
+  use Data::Dumper;
+
+  use overload '""' => sub { Dumper($_[0]) };
+
   sub throw {
     my $self = bless $_[1], $_[0];
     die $self;
