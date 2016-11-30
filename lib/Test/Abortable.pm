@@ -15,9 +15,9 @@ sub subtest {
   my $ctx = Test2::API::context();
 
   my $pass = Test2::API::run_subtest($name, sub {
-    my $ctx = Test2::API::context();
-
     my $ok = eval { $code->(); 1 };
+
+    my $ctx = Test2::API::context();
 
     if (! $ok) {
       my $error = $@;
