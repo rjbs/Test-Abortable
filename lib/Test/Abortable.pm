@@ -6,14 +6,14 @@ package Test::Abortable;
 use Test2::API 1.302045 ();
 
 sub subtest {
-  my ($self, $name, $code) = @_;
+  my ($name, $code) = @_;
 
   my $ctx = Test2::API::context();
 
   my $pass = Test2::API::run_subtest($name, sub {
     my $ctx = Test2::API::context();
 
-    my $ok = eval { $self->$name; 1 };
+    my $ok = eval { $code->(); 1 };
 
     if (! $ok) {
       my $error = $@;
