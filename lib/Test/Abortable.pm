@@ -4,6 +4,12 @@ package Test::Abortable;
 # ABSTRACT: subtests that you can die your way out of ... but still live
 
 use Test2::API 1.302045 ();
+use Sub::Exporter -setup => {
+  exports => [ qw(subtest testeval) ],
+  groups  => { default => [ qw(subtest testeval) ] },
+  # TODO: use a custom installer that will silently clobber *iff* it's
+  # replacing stock Test::More subtest with our subtest
+};
 
 sub subtest {
   my ($name, $code) = @_;
