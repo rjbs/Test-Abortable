@@ -41,8 +41,17 @@ my $events = intercept {
     pass("five");
   };
 
-  Test::Abortable::subtest "this will run just fine" => sub {
+  Test::More::subtest "this will run just fine" => sub {
     pass("everything is just fine");
+
+    testeval {
+      pass("alfa");
+      pass("bravo");
+      Abort::Test->throw({ description => "zulu" });
+      pass("charlie");
+    };
+
+    pass("do you like gladiators?");
   };
 
   Test::Abortable::subtest "I like fine wines and cheeses" => sub {
@@ -70,6 +79,19 @@ subtest "first subtest" => sub {
   ok(! $oks[2]->pass, "third failed");
   is($oks[2]->name, "just give up", "the final Ok test looks like our abort");
   isa_ok($oks[2]->get_meta('test_abort_object'), 'Abort::Test', 'test_abort_object');
+};
+
+subtest "second subtest" => sub {
+  my @oks = grep {; $_->isa('Test2::Event::Ok') } @{ $subtests[1]->subevents };
+  is(@oks, 5, "three pass/fail events");
+  ok($oks[0]->pass,   "first passed");
+  ok($oks[1]->pass,   "second passed");
+  ok($oks[2]->pass,   "third passed");
+  ok(! $oks[3]->pass, "fourth failed");
+  ok($oks[4]->pass,   "fifth passed");
+
+  is($oks[3]->name, "zulu", "the abort Ok test looks like our abort");
+  isa_ok($oks[3]->get_meta('test_abort_object'), 'Abort::Test', 'test_abort_object');
 };
 
 subtest "third subtest" => sub {
