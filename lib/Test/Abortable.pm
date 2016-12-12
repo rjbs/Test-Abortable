@@ -107,6 +107,7 @@ sub subtest {
           $e->set_meta(test_abort_object => $error)
         }
       } else {
+        $ctx->release;
         die $error;
       }
     }

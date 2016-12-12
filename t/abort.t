@@ -65,13 +65,20 @@ my $events = intercept {
 
     fail("feeling gross");
   };
+
+  Test::Abortable::subtest "I like fine wines and cheeses" => sub {
+    pass("I like New York in June.");
+    die "How 'bout you?";
+  }
 };
 
 my @subtests = grep {; $_->isa('Test2::Event::Subtest') } @$events;
 
-is(@subtests, 3, "we ran three subtests (the three test methods)");
+is(@subtests, 4, "we ran three subtests (the three test methods)");
 
 subtest "first subtest" => sub {
+  ok(! $subtests[0]->pass, "it failed");
+
   my @oks = grep {; $_->isa('Test2::Event::Ok') } @{ $subtests[0]->subevents };
   is(@oks, 3, "three pass/fail events");
   ok($oks[0]->pass, "first passed");
@@ -82,6 +89,8 @@ subtest "first subtest" => sub {
 };
 
 subtest "second subtest" => sub {
+  ok(! $subtests[1]->pass, "it failed");
+
   my @oks = grep {; $_->isa('Test2::Event::Ok') } @{ $subtests[1]->subevents };
   is(@oks, 5, "three pass/fail events");
   ok($oks[0]->pass,   "first passed");
@@ -95,6 +104,8 @@ subtest "second subtest" => sub {
 };
 
 subtest "third subtest" => sub {
+  ok($subtests[2]->pass, "it passed");
+
   my @oks = grep {; $_->isa('Test2::Event::Ok') } @{ $subtests[2]->subevents };
   is(@oks, 2, "two pass/fail events");
   ok($oks[0]->pass, "first passed");
@@ -118,5 +129,14 @@ subtest "third subtest" => sub {
   );
 };
 
+subtest "fourth subtest" => sub {
+  ok(! $subtests[3]->pass, "it failed");
+
+  my @events = @{ $subtests[3]->subevents };
+  is(@events, 1, "we get two events");
+  ok($events[0]->pass, "first passed");
+  # TODO: test the diag of the error
+
+};
 
 done_testing;
