@@ -7,6 +7,47 @@ use Test::Abortable;
 use Test::More;
 
 {
+  package Test2::EventDumper;
+  sub dump {
+    my ($events) = @_;
+    _dump($events, '');
+  }
+
+  sub _dump {
+    my ($events, $prefix) = @_;
+
+    my $str = q{};
+    for my $event (@$events) {
+      (my $type = ref $event) =~ s/^Test2::Event:://;
+      if ($event->isa('Test2::Event::Subtest')) {
+        $str .= ref($event) . "\n";
+        $str .= _dump($event->subevents, q{  });
+      } elsif ($event->isa('Test2::Event::Plan')) {
+        (my $plan = $event->summary) =~ s/^Plan is //;
+        $str .= sprintf qq{%s(%s)\n}, $type, $event->summary;
+      } elsif ($event->isa('Test2::Event::Ok')) {
+        my $name = $event->name;
+        $name =~ s/[\v\n\r]//g;
+        $str .= sprintf qq{%s/%s(%s)\n},
+          $type,
+          ($event->pass ? 'Pass' : 'Fail'),
+          $name;
+      } elsif ($event->isa('Test2::Event::Diag') or $event->isa('Test2::Event::Note')) {
+        my $msg = $event->message;
+        chomp $msg;
+        $msg =~ s/[\v\n\r]/<>/g;
+        $str .= sprintf qq{%s("%s")\n}, $type, $msg;
+      } else {
+        $str .= ref($event) . "\n";
+      }
+    }
+
+    $str =~ s/^/$prefix/gm;
+    return $str;
+  }
+}
+
+{
   package Abort::Test;
 
   use Data::Dumper;
@@ -71,6 +112,8 @@ my $events = intercept {
     die "How 'bout you?";
   }
 };
+
+# diag( Test2::EventDumper::dump($events) );
 
 my @subtests = grep {; $_->isa('Test2::Event::Subtest') } @$events;
 
