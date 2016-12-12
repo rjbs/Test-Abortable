@@ -170,4 +170,36 @@ sub testeval (&) {
   return $wa ? @result : $result[0];
 }
 
+=head1 EXCEPTION IMPLEMENTATIONS
+
+You don't need to use an exception class provided by Test::Abortable to build
+abortable exceptions.  This is by design.  In fact, Test::Abortable doesn't
+ship with any abortable exception classes at all.  You should just add a
+C<as_test_abort_events> where it's useful and appropriate.
+
+Here are two possible simple implementations of trivial abortable exception
+classes.  First, using plain old vanilla objects:
+
+  package Abort::Test {
+    sub as_test_abort_events ($self) {
+      return [ [ Ok => (pass => 0, name => $self->{message}) ] ];
+    }
+  }
+  sub abort ($message) { die bless { message => $message }, 'Abort::Test' }
+
+This works, but if those exceptions ever get caught somewhere else, you'll be
+in a bunch of pain because they've got no stack trace, no stringification
+behavior, and so on.  For a more robust but still tiny implementation, you
+might consider L<failures>:
+
+  use failures 'testabort';
+  sub failure::testabort::as_test_abort_events ($self) {
+    return [ [ Ok => (pass => 0, name => $self->msg) ] ];
+  }
+
+For whatever it's worth, the author's intent is to add C<as_test_abort_events>
+methods to his code through the use of application-specific Moose roles,
+
+=cut
+
 1;
