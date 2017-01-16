@@ -1,6 +1,7 @@
 Release history for Test-Abortable
 
 {{$NEXT}}
+        - require a Test2::API with a no_fork option to run_subtest, and use it
 
 0.001     2016-12-12 18:01:52-05:00 America/New_York
         - first release

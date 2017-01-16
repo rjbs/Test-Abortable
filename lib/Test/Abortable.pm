@@ -66,7 +66,7 @@ be added.
 
 =cut
 
-use Test2::API 1.302045 ();
+use Test2::API 1.302075 (); # no_fork
 use Sub::Exporter -setup => {
   exports => [ qw(subtest testeval) ],
   groups  => { default => [ qw(subtest testeval) ] },
@@ -115,7 +115,7 @@ sub subtest {
     $ctx->release;
 
     return;
-  });
+  }, { no_fork => 1 });
 
   $ctx->release;
 
